@@ -41,12 +41,6 @@ jobs:
           else
               git checkout -b images
           fi
-
-          # Copy downloaded images into branch (assuming script outputs to ./images)
-          mkdir -p ./image
-          if [ -d "image" ]; then
-            cp -r image/* ./image
-          fi
           
           # Stage changes and commit if there are any
           git add .
