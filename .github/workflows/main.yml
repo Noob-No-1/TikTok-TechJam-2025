@@ -23,6 +23,7 @@ jobs:
       - name: Run downloader script
         run: |
           python main_downloader.py
+        working-directory: ${{ github.workspace }}
 
       - name: Commit to images branch
         run: |
