@@ -43,7 +43,10 @@ jobs:
           fi
 
           # Copy downloaded images into branch (assuming script outputs to ./images)
-          cp -r image/* .
+          mkdir -p ./image
+          if [ -d "image" ]; then
+            cp -r image/* ./image
+          fi
           
           # Stage changes and commit if there are any
           git add .
