@@ -1,7 +1,10 @@
 name: Download and Commit Images
 
 on:
-  workflow_dispatch:  # manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   download-images:
