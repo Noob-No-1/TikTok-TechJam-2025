@@ -33,7 +33,7 @@ jobs:
           git checkout images || git checkout -b images
 
           # Copy downloaded images into branch (assuming script outputs to ./images)
-          cp -r images/* .
+          cp -r image/* .
 
           git add .
           git commit -m "Add new images from downloader" || echo "No changes to commit"
