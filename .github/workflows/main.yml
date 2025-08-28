@@ -29,12 +29,22 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git fetch origin
-          git checkout images || git checkout -b images
+          # Fetch all branches and tags
+          git fetch --all
+
+          # Create or switch to the images branch
+          if git show-ref --verify --quiet refs/heads/images; then
+              git checkout images
+          else
+              git checkout -b images
+          fi
 
           # Copy downloaded images into branch (assuming script outputs to ./images)
           cp -r image/* .
-
+          
+          # Stage changes and commit if there are any
           git add .
-          git commit -m "Add new images from downloader" || echo "No changes to commit"
+          git diff --cached --quiet || git commit -m "Add new images from downloader"
+          
+          # Push to origin
           git push origin images
