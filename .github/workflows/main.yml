@@ -38,7 +38,6 @@ jobs:
           # Create or switch to the images branch
           if git show-ref --verify --quiet refs/heads/images; then
               git checkout images
-              git pull --rebase origin images 
           else
               git checkout -b images
           fi
@@ -48,4 +47,4 @@ jobs:
           git diff --cached --quiet || git commit -m "Add new images from downloader"
           
           # Push to origin
-          git push origin images
+          git push origin images --force
