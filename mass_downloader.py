@@ -38,5 +38,5 @@ def main(urls):
 # TODO: Read URLs from CSV and call main
 if __name__ == "__main__":
     df = pd.read_csv("data/image-index-NDK.final.csv")
-    urls = df["urls"].dropna().tolist()[:10000]
+    urls = df["urls"].dropna().tolist()
     main(urls)
