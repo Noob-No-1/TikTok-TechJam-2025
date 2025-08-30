@@ -36,22 +36,42 @@ _SYSTEM_MSG = (
 )
 
 _USER_TEMPLATE = """Task: Classify a location review for relevance and policy violations.
+IMPORTANT: Do not assign "rant_no_visit" unless the Text contains an explicit phrase proving non-visit.
+Never infer non-visit from tone, rating, negativity, or from the image description.
 
 Definitions (pick exactly one violation):
-- advertisement: contains promotional links/codes, phone numbers, coupons, “call now”, or unrelated marketing.
+- advertisement: contains promotional links/codes, phone numbers, coupons, “call now”, or unrelated marketing (either in text OR in the image description).
 - irrelevant: off-topic; not about this place or its services; about another product/person/event; misplaced review (clearly for a different business type); filler/emoji-only.
-- rant_no_visit: reviewer clearly states they did not visit (e.g., “never been”, “haven’t been”, “heard it’s…”).
+- rant_no_visit: reviewer clearly states they did not visit (must be explicit phrases in the Text such as “never been”, “haven’t been”, “did not visit”, “just heard”, “heard it’s…”; do NOT infer from tone or image).
+- image_irrelevant: the image description is unrelated to the business category or the review content (e.g., dog/car/selfie for a restaurant) even if the text is on-topic.
+- image_advertisement: the image description appears to be an ad or promo (poster/flyer/QR/coupon/brand banner/phone number/discount/promo).
 - ok: none of the above AND the review is about this place.
 
-Intent & fallback principle:
-If none of the violation categories apply and the review is about the place, classify as "ok".
-Default to "ok" when in doubt, because the goal is to increase user trust, ensure fair business representation, and enhance platform credibility.
+Image hint (optional):
+If the review text ends with a sentence like "With a picture of <caption>", treat that as the image description (from the attached photo).
+- If the image description contradicts or is unrelated to the place/category or the review content, set the violation to "image_irrelevant" and add indicator token "irrelevant_picture".
+- If the image description is promotional (poster/flyer/QR/coupon/brand banner/phone number/discount/promo), set the violation to "image_advertisement" and add indicator token "image_ad".
+- When text is on-topic but the image is off-topic, prefer "image_irrelevant" over "ok" (unless an advertisement label applies by precedence).
+
+Dynamic relevance (how to set the `relevant` boolean):
+- Set `relevant` = false if:
+  * both text and image are off-topic; OR
+  * the image is clearly misleading/advertising or strongly contradicts the place (e.g., unrelated venue/product), overwhelming the textual relevance; OR
+  * the reviewer explicitly did not visit (rant_no_visit).
+- Otherwise set `relevant` = true (e.g., text clearly about the place but the image is a minor mismatch/extra info).
+
+Precedence when choosing the single `violation` value (pick the highest that applies):
+1) advertisement or image_advertisement
+2) rant_no_visit
+3) image_irrelevant
+4) irrelevant
+5) ok
 
 Output STRICT JSON only (double-quoted keys/strings; booleans lowercase):
 {{
   "relevant": true|false,
-  "violation": "advertisement"|"irrelevant"|"rant_no_visit"|"ok",
-  "classification": "advertisement"|"irrelevant"|"rant_no_visit"|"ok",
+  "violation": "advertisement"|"irrelevant"|"rant_no_visit"|"image_irrelevant"|"image_advertisement"|"ok",
+  "classification": "advertisement"|"irrelevant"|"rant_no_visit"|"image_irrelevant"|"image_advertisement"|"ok",
   "confidence": 0.0-1.0,
   "reasoning": "<short phrase>",
   "indicators": ["token1","token2"]
@@ -101,7 +121,7 @@ def classify_review(
         dict with keys:
         {
           "relevant": true/false | None on error,
-          "violation": "advertisement"|"irrelevant"|"rant_no_visit"|"ok"|"LLM_ERROR",
+          "violation": "advertisement"|"irrelevant"|"rant_no_visit"|"ok"|"LLM_ERROR"|"image_irrelevant" | "image_advertisement",
           "classification": same as violation or "LLM_ERROR",
           "confidence": float | None,
           "reasoning": str,
