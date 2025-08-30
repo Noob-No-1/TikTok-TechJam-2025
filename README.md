@@ -1,5 +1,8 @@
 # TikTok TechJam 2025
 Review Reviewer
+
+![Project Logo](logo.png)
+
 Product of Team Null for TikTok TechJam 2025
 
 1. The product is an AI-based comment reviewer. It helps applications like google map to filter out low-quality comments like advertisement and irrelavent comments.
