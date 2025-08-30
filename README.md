@@ -1,7 +1,7 @@
 # TikTok TechJam 2025
 Review Reviewer
 
-![Project Logo](logo.png)
+![Project Logo](Logo.png)
 
 Product of Team Null for TikTok TechJam 2025
 
